@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebSocket Tracker</title>
+</head>
+<body>
+  <h1>WebSocket Tracker</h1>
+  <form id="tracking-form">
+    <label>
+      Type:
+      <input type="text" id="type" required />
+    </label>
+    <br />
+    <label>
+      Details:
+      <textarea id="details" required></textarea>
+    </label>
+    <br />
+    <button type="submit">Send Data</button>
+  </form>
+  <div id="output"></div>
+
+  <script>
+    const ws = new WebSocket("ws://localhost:8080");
+
+    ws.onopen = () => {
+      console.log("WebSocket connection opened");
+      document.getElementById("output").innerText = "Connected to WebSocket server!";
+    };
+
+    ws.onmessage = (event) => {
+      console.log("Received message:", event.data);
+      const response = JSON.parse(event.data);
+      document.getElementById("output").innerText = `Server Response: ${response.message}`;
+    };
+
+    ws.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    ws.onclose = () => {
+      console.log("WebSocket connection closed");
+      document.getElementById("output").innerText = "Connection closed. Refresh to reconnect.";
+    };
+
+    document.getElementById("tracking-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const type = document.getElementById("type").value;
+      const details = document.getElementById("details").value;
+
+      const data = {
+        type,
+        details: JSON.parse(details),
+      };
+
+      ws.send(JSON.stringify(data));
+    });
+  </script>
+</body>
+</html>
